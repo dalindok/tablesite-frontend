@@ -1,12 +1,48 @@
+import Footer from "@/components/Footer";
+import "./globals.css";
+import NavBar from "@/components/NavBar";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
+import localFont from "next/font/local";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
+const inter = localFont({
+  src: [
+    {
+      path: "./fonts/Inter_24pt-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Inter_24pt-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Inter_18pt-Bold.ttf", // add the bold font path
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter",
+});
+const libre = localFont({
+  src: [
+    {
+      path: "./fonts/LibreBaskerville-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/LibreBaskerville-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-libre",
+});
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -25,9 +61,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased ${inter.variable} ${libre.variable} font-sans`}
       >
+        <div className="px-16 sticky top-0 z-10 bg-white">
+          <NavBar />
+        </div>
+
         {children}
+        <div className="px-16 bg-dark ">
+          <Footer />
+        </div>
       </body>
     </html>
   );
