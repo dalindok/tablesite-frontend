@@ -61,12 +61,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${inter.variable} ${libre.variable} font-sans`}
       >
         <div className="px-16 sticky top-0 z-10 bg-white">
           <NavBar />
         </div>
-
         {children}
         <div className="px-16 bg-dark ">
           <Footer />
