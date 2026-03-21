@@ -105,6 +105,7 @@ const page = () => {
             {/* Restaurant Cards */}
             {mock.map((item) => (
               <RestaurantCard
+                id={item.id}
                 key={item.id}
                 name={item.name}
                 imgUrl={item.imgUrl}
