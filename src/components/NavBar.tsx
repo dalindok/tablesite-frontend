@@ -22,7 +22,7 @@ const NavBar = () => {
       label: "Account",
       icon: <MdAccountCircle size={26} />,
       onClick: () => {
-        router.push("/profile");
+        router.push("/account");
       },
     },
     {
@@ -90,20 +90,8 @@ const NavBar = () => {
           </div>
         </div>
       </div>
-      {/* <div className="flex flex-row justify-end items-center border-b border-gray-200 py-4">
-        <div className="flex flex-row gap-8 text-gray-500"></div>
-      </div> */}
+
       {isOpenSignin && <LoginCard onClose={() => setIsOpenSignin(false)} />}
-      {/* {isOpenAccount && < onClose={() => setIsOpenAccount(false)} />} */}
-      {/* {isOpenSignup && (
-        <SignupCard
-          onClose={() => setIsOpenSignup(false)}
-          onSwitchToLogin={() => {
-            setIsOpenSignup(false);
-            setIsOpenSignin(true);
-          }}
-        />
-      )} */}
     </>
   );
 };

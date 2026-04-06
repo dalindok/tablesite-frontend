@@ -3,16 +3,65 @@
 import { useState } from "react";
 import Link from "next/link";
 import FilledButton from "../Button/FilledButton";
+import AUTH_API from "@/app/api/Auth";
+import { useRequest } from "ahooks";
+import { useAuthContext } from "@/contexts/AuthContext";
+
 const LoginCard = ({ onClose }: { onClose: () => void }) => {
-  const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  // const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
+  const [smsSent, setSmsSent] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const { login } = useAuthContext();
+  const otp = otpDigits.join("");
+
+  const { run: sentOTP, loading: loadingOTP } = useRequest(AUTH_API.sendOtp, {
+    manual: true,
+    onSuccess: (data: any) => {
+      setSmsSent(true);
+      setError("");
+      const otpCode = data?.otp || "1234"; // Display OTP from response or default
+      const successMsg = `OTP sent successfully! Your OTP is: ${otpCode}`;
+      setSuccess(successMsg);
+      // Show as window alert as well
+      window.alert(successMsg);
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(""), 5000);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to send SMS");
+      setSuccess("");
+    },
+  });
+
+  const { run: verifyOTP, loading: loadingVerify } = useRequest(
+    AUTH_API.verifyOtp,
+    {
+      manual: true,
+      onSuccess: (data) => {
+        login({
+          token: data.token,
+          user: data.user,
+        });
+        onClose();
+      },
+      onError: (err) => setError(err.message || "Verification failed"),
+    },
+  );
+
+  const handleVerify = () => {
+    if (!phone.trim()) return;
+    sentOTP({ phone: phone.trim(), is_debug: true });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // handle login logic here
-    // console.log({ email, password, rememberMe });
+    if (!smsSent || otp.length !== 4) {
+      setError("Please verify your phone and enter complete OTP");
+      return;
+    }
+    verifyOTP({ phone: phone.trim(), otp });
   };
   return (
     <div
@@ -39,6 +88,10 @@ const LoginCard = ({ onClose }: { onClose: () => void }) => {
         <p className="text-gray-500 text-sm mb-6">
           SMS verification code is required to login
         </p>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {success && (
+          <p className="text-green-500 text-sm mb-4 font-semibold">{success}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
@@ -49,105 +102,82 @@ const LoginCard = ({ onClose }: { onClose: () => void }) => {
 
             <div className="flex flex-row gap-2">
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="012 345 678"
                 className="w-full bg-gray-100 rounded-xl px-4 py-3.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 border-none"
                 required
               />
-              <>
-                <FilledButton label={"Verify"} />
-              </>
+              <FilledButton
+                type="button"
+                label={loadingOTP ? "Sending..." : "Verify"}
+                onClick={handleVerify}
+                disabled={!phone.trim() || loadingOTP}
+              />
             </div>
           </div>
           {/* OTP */}
-          <div>
-            <label className="block text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1.5">
-              OTP
-            </label>
-            <div className="flex gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <input
-                  key={i}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  className="w-full aspect-square bg-gray-100 rounded-xl text-center text-lg font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 border-none caret-transparent"
-                  onKeyDown={(e) => {
-                    if (e.key === "Backspace" && !e.currentTarget.value) {
-                      const prev = e.currentTarget.parentElement?.children[
-                        i - 1
-                      ] as HTMLInputElement;
-                      prev?.focus();
-                    }
-                  }}
-                  onInput={(e) => {
-                    const input = e.currentTarget;
-                    // Allow only digits
-                    input.value = input.value.replace(/\D/g, "").slice(-1);
-                    if (input.value) {
-                      const next = input.parentElement?.children[
-                        i + 1
-                      ] as HTMLInputElement;
-                      next?.focus();
-                    }
-                  }}
-                  onFocus={(e) => e.currentTarget.select()}
-                  required
-                />
-              ))}
+          {smsSent && (
+            <div>
+              <label className="block text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1.5">
+                OTP
+              </label>
+              <div className="flex gap-3">
+                {[0, 1, 2, 3].map((i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={otpDigits[i]}
+                    className="w-full aspect-square bg-gray-100 rounded-xl text-center text-lg font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 border-none caret-transparent"
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace" && !e.currentTarget.value) {
+                        const prev = e.currentTarget.parentElement?.children[
+                          i - 1
+                        ] as HTMLInputElement;
+                        prev?.focus();
+                      }
+                    }}
+                    onInput={(e) => {
+                      const input = e.currentTarget;
+                      // Allow only digits
+                      input.value = input.value.replace(/\D/g, "").slice(-1);
+                      const newDigits = [...otpDigits];
+                      newDigits[i] = input.value;
+                      setOtpDigits(newDigits);
+                      if (input.value) {
+                        const next = input.parentElement?.children[
+                          i + 1
+                        ] as HTMLInputElement;
+                        next?.focus();
+                      }
+                    }}
+                    onFocus={(e) => e.currentTarget.select()}
+                    required
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Remember me + Forgot password */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 accent-primary"
-              />
-              <span className="text-sm text-gray-600">Remember me</span>
-            </label>
-            {/* <Link
-              href="/forgot-password"
-              className="text-sm font-semibold text-primary-hover"
-              //   style={{ color: "#E8440A" }}
-            >
-              Forgot password?
-            </Link> */}
+          {/* OTP submit area */}
+          <div className="flex items-center justify-end">
+            <span className="text-sm text-gray-500">
+              Enter the 4-digit code sent to your phone.
+            </span>
           </div>
 
           {/* Sign In button */}
           <button
             type="submit"
-            className="w-full py-4 rounded-xl text-white bg-primary font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
+            disabled={loadingVerify}
+            className="w-full py-4 rounded-xl text-white bg-primary font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             // style={{ background: "linear-gradient(135deg, #E8440A, #FF6B35)" }}
           >
-            Sign In →
+            {loadingVerify ? "Signing In..." : "Sign In →"}
           </button>
         </form>
-
-        {/* Divider */}
-        {/* <div className="flex items-center gap-3 my-5">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-sm text-gray-400">or continue with</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div> */}
-
-        {/* Social buttons
-        <div className="grid grid-cols-2 gap-3">
-          <button className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-            🌐 Google
-          </button>
-          <button className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-            📘 Facebook
-          </button>
-        </div> */}
-
-        {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-5">
           By signing in you agree to our{" "}
           <Link href="/terms" className="font-medium text-primary-hover">
