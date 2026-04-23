@@ -1,13 +1,23 @@
 declare namespace IUser {
-  export interface IUserData {
-    user_id: number;
-    name: string;
+  interface IUserResponse {
+    success: boolean;
+    message: string;
+    data: Data;
+  }
+
+  interface Data {
+    user: User;
+  }
+
+  interface User {
+    id: number;
     email: string;
+    first_name: string;
+    last_name: string;
     phone: string;
-    role: UserRole;
-    avatar_url: string | null;
+    avatar_url: any;
+    role: string;
     is_active: boolean;
-    city: string;
     created_at: string;
     updated_at: string;
   }

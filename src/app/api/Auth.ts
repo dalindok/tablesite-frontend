@@ -7,13 +7,13 @@ const AUTH_API = {
     return res.data;
   },
   verifyOtp: async (data: IAuth.IVerifyOTP) => {
-    const res = await http.post<IAuth.Root>(API_ROUTE.verifySMS, data);
+    const res = await http.post<IAuth.Data>(API_ROUTE.verifySMS, data);
     console.log("📡 API Response:", res.data);
 
     // Extract the nested data property if it exists
-    if (res.data.data) {
-      console.log("✅ Extracted nested data:", res.data.data);
-      return res.data.data;
+    if (res.data) {
+      console.log("✅ Extracted nested data:", res.data);
+      return res.data;
     }
 
     console.log("⚠️  No nested data, returning response as-is");

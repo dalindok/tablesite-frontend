@@ -1,32 +1,77 @@
 declare namespace Restaurant {
-  export interface IRestaurant {
-    restaurant_id: number;
-    owner_id: number;
+  interface Root {
+    success: boolean;
+    message: string;
+    data: Data;
+  }
+  interface RestaurantDataListResponse {
+    data: RestaurantDataList[];
+    pagination: Pagination;
+  }
+
+  interface RestaurantDataList {
+    id: number;
     name: string;
+    slug: string;
     description: string;
+    cuisine_type: string;
     address: string;
     city: string;
-    cuisine_type: string;
-    price_range: PriceRange;
-    cover_image: string | null;
-    avg_rating: number | null;
+    state: string;
+    country: string;
+    phone: string;
+    email: string;
+    website: string;
+    cover_image_url: string;
+    average_rating: string;
     total_reviews: number;
-    is_active: boolean;
-    is_approved: boolean;
-    documents_complete: boolean;
-    features: string[];
-    latitude: number;
-    longitude: number;
-    categories: ICategory[];
+    gallery_images: GalleryImage[];
+    tags: Tag[];
+    amenities: any[];
+    owner: Owner;
+    stats: Stats;
+    created_at: string;
+  }
+
+  interface GalleryImage {
+    id: number;
+    restaurant_id: number;
+    url: string;
+    caption: string;
+    sort_order: number;
     created_at: string;
     updated_at: string;
   }
-  interface ICategory {
-    category_id: number;
+
+  interface Tag {
+    id: number;
     name: string;
-    slug: string;
-    icon: string;
-    description: string;
-    restaurant_count: number;
+    created_at: string;
+    updated_at: string;
+  }
+
+  interface Owner {
+    id: number;
+    user: User;
+  }
+
+  interface User {
+    id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    avatar_url: any;
+  }
+
+  interface Stats {
+    total_bookings: number;
+    total_reviews: number;
+  }
+
+  interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
   }
 }
