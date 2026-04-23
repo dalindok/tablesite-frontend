@@ -1,3 +1,30 @@
+import { list } from "postcss";
+
+interface SubRoute {
+  subName: string;
+}
+
+// interface NavigationItem {
+//   name: string;
+//   route: string;
+//   subRoutes: SubRoute[];
+// }
+
+export const API_ROUTE = {
+  root: "/",
+
+  //auth
+  sentSMS: "auth/send-sms",
+  verifySMS: "auth/verify-sms",
+  // check: "/api/v1/auth/multi-identifier/get-profiles",
+
+  //profile
+  profile: "auth/profile",
+  editProfile: "auth/update-user",
+
+  // restaurants
+  listRestaurants: "restaurants",
+};
 export const sideBarMenu = [
   {
     id: 1,

@@ -1,11 +1,12 @@
-declare namespace IUser {
-  interface IUserResponse {
+declare namespace IAuth {
+  interface Root {
     success: boolean;
     message: string;
     data: Data;
   }
 
   interface Data {
+    token: string;
     user: User;
   }
 
@@ -20,5 +21,15 @@ declare namespace IUser {
     is_active: boolean;
     created_at: string;
     updated_at: string;
+  }
+
+  interface ISentOPT {
+    phone: string;
+    is_debug: boolean;
+  }
+
+  interface IVerifyOTP {
+    phone: string;
+    otp: string;
   }
 }

@@ -2,7 +2,7 @@ import React from "react";
 
 const Mission = () => {
   return (
-    <div className="p-16 bg-gray-50">
+    <div className="flex flex-row p-16 bg-gray-50 items-center justify-between">
       <div className="flex flex-col gap-6 ">
         <p className="text-primary font-semibold text-md">Our Mission</p>
         <p className="text-5xl font-bold w-150">
@@ -18,6 +18,9 @@ const Mission = () => {
           diners instant access to real-time availability and giving owners a
           powerful dashboard to grow their business.
         </p>
+      </div>
+      <div className="w-96 mr-16">
+        <img src="/assets/chairs-dinner.svg" alt="Mission" />
       </div>
     </div>
   );
