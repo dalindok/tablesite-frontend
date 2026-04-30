@@ -24,6 +24,12 @@ export const API_ROUTE = {
 
   // restaurants
   listRestaurants: "restaurants",
+  restaurantDetails: "restaurants/:id",
+
+  // bookings
+  createBooking: "bookings/create",
+  // listBookings: "bookings",
+  // bookingDetails: "bookings/:id",
 };
 export const sideBarMenu = [
   {

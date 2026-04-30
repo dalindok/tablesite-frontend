@@ -2,9 +2,10 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sideBarMenu } from "@/utils/route-utils";
 import SidebarItem from "@/components/AccountCom/SidebarItem";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AccountSidebar() {
   const searchParams = useSearchParams();
@@ -12,8 +13,6 @@ export default function AccountSidebar() {
   const activeIdFromParam = Number(searchParams.get("id"));
   const activeId =
     activeIdFromParam || (pathname.startsWith("/account") ? 1 : 0);
-
-  const handleLogout = () => Promise<void>;
 
   return (
     <div className="">

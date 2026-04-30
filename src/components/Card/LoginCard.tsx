@@ -34,22 +34,20 @@ const LoginCard = ({ onClose }: { onClose: () => void }) => {
       setSuccess("");
     },
   });
-
   const { run: verifyOTP, loading: loadingVerify } = useRequest(
     AUTH_API.verifyOtp,
     {
       manual: true,
       onSuccess: (data) => {
         login({
-          token: data.token,
-          user: data.user,
+          token: data.data.token, // ✅ unwrap .data
+          user: data.data.user, // ✅ unwrap .data
         });
         onClose();
       },
       onError: (err) => setError(err.message || "Verification failed"),
     },
   );
-
   const handleVerify = () => {
     if (!phone.trim()) return;
     sentOTP({ phone: phone.trim(), is_debug: true });

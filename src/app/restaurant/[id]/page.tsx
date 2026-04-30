@@ -1,24 +1,42 @@
+"use client";
+
+import { use } from "react";
+import Restaurant_API from "@/app/api/Restaurant";
 import BookingCard from "@/components/Card/BookingCard";
 import AboutSection from "@/Features/Restaurants/AboutSection";
 import DetailHeader from "@/Features/Restaurants/DetailHeader";
 import RestaurantDetail from "@/Features/Restaurants/RestaurantDetail";
-import React from "react";
+import { useRequest } from "ahooks";
 
-const page = () => {
+const RestaurantDetailPage = ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const { id } = use(params); // ✅ unwrap here
+
+  console.log("params.id:", id);
+
+  const restaurantId = Number(id);
+
+  const { data, loading, error } = useRequest(() =>
+    Restaurant_API.getRestaurantDetails(restaurantId),
+  );
+
   return (
     <div>
-      <DetailHeader />
+      <DetailHeader detail={data} />
       <div className="py-12 px-16 grid grid-cols-1 lg:grid-cols-3 gap-10 ">
         <div className="lg:col-span-2">
-          <RestaurantDetail />
+          <RestaurantDetail detail={data} />
         </div>
 
         <div className="lg:col-span-1">
-          <BookingCard />
+          <BookingCard data={data} />
         </div>
       </div>
     </div>
   );
 };
 
-export default page;
+export default RestaurantDetailPage;

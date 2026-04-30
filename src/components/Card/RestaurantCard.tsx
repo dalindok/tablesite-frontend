@@ -32,13 +32,25 @@ const RestaurantCard = ({
 }: RestaurantCardProps) => {
   const [liked, setLiked] = useState(false);
   const [selectedTime, setSelectedTime] = useState(availableTimes[0]);
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg hover:shadow-light transition-transform duration-200 hover:-translate-y-1">
       <Link href={`/restaurant/${id}`}>
         {/* Image Section */}
         <div className="relative">
-          <img src={imgUrl} alt={name} className="w-full h-50 object-cover" />
+          {!imgError ? (
+            <img
+              src={imgUrl}
+              alt={name}
+              className="w-full h-50 object-cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-50 bg-gray-300 flex items-center justify-center text-gray-500">
+              No Image Available
+            </div>
+          )}
 
           {/* Top Pick Badge */}
           {isTopPick && (
@@ -95,7 +107,7 @@ const RestaurantCard = ({
           </div>
 
           {/* Time Slots */}
-          <div className="flex gap-2 mt-3">
+          {/* <div className="flex gap-2 mt-3">
             {availableTimes.map((time) => (
               <button
                 key={time}
@@ -109,7 +121,7 @@ const RestaurantCard = ({
                 {time}
               </button>
             ))}
-          </div>
+          </div> */}
 
           {/* Reserve Button */}
           <button className="mt-4 w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-hover transition">

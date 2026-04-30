@@ -2,6 +2,24 @@
 
 import { useState } from "react";
 
+import { Dispatch, SetStateAction } from "react";
+
+type Filters = {
+  search: string;
+  location: string;
+  date: string;
+  guests: number;
+  cuisines: string[];
+  neighborhoods: string[];
+  priceRate: string;
+  sortBy: string;
+};
+
+type SideBarProps = {
+  filters: Filters;
+  setFilters: Dispatch<SetStateAction<Filters>>;
+};
+
 const cuisines = [
   { label: "Italian", count: 64 },
   { label: "Japanese", count: 48 },
@@ -21,26 +39,29 @@ const neighborhoods = [
 
 const priceLevels = ["$", "$$", "$$$", "$$$$"];
 
-export default function SideBar() {
-  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([
-    "Italian",
-    "Asian Fusion",
-  ]);
-  const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([
-    "Daun Penh",
-  ]);
-  const [selectedPrice, setSelectedPrice] = useState<string>("$");
+export default function SideBar({ filters, setFilters }: SideBarProps) {
+  const selectedCuisines = filters.cuisines;
+  const selectedNeighborhoods = filters.neighborhoods;
+  const selectedPrice = filters.priceRate;
 
-  const toggle = (
-    value: string,
-    selected: string[],
-    setSelected: (v: string[]) => void,
-  ) => {
-    setSelected(
-      selected.includes(value)
-        ? selected.filter((v) => v !== value)
-        : [...selected, value],
-    );
+  const toggleCuisine = (value: string) => {
+    const updated = selectedCuisines.includes(value)
+      ? selectedCuisines.filter((v) => v !== value)
+      : [...selectedCuisines, value];
+
+    setFilters((prev) => ({ ...prev, cuisines: updated }));
+  };
+
+  const toggleNeighborhood = (value: string) => {
+    const updated = selectedNeighborhoods.includes(value)
+      ? selectedNeighborhoods.filter((v) => v !== value)
+      : [...selectedNeighborhoods, value];
+
+    setFilters((prev) => ({ ...prev, neighborhoods: updated }));
+  };
+
+  const togglePrice = (value: string) => {
+    setFilters((prev) => ({ ...prev, priceRate: value }));
   };
 
   return (
@@ -57,9 +78,7 @@ export default function SideBar() {
               <li key={label} className="flex items-center justify-between">
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <div
-                    onClick={() =>
-                      toggle(label, selectedCuisines, setSelectedCuisines)
-                    }
+                    onClick={() => toggleCuisine(label)}
                     className={`w-4 h-4 rounded flex items-center justify-center border transition-colors cursor-pointer ${
                       checked
                         ? "bg-orange-500 border-orange-500"
@@ -106,7 +125,7 @@ export default function SideBar() {
           {priceLevels.map((price) => (
             <button
               key={price}
-              onClick={() => setSelectedPrice(price)}
+              onClick={() => togglePrice(price)}
               className={`flex-1 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
                 selectedPrice === price
                   ? "border-orange-500 text-orange-500 bg-orange-50"
@@ -131,13 +150,7 @@ export default function SideBar() {
               <li key={label} className="flex items-center justify-between">
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <div
-                    onClick={() =>
-                      toggle(
-                        label,
-                        selectedNeighborhoods,
-                        setSelectedNeighborhoods,
-                      )
-                    }
+                    onClick={() => toggleNeighborhood(label)}
                     className={`w-4 h-4 rounded flex items-center justify-center border transition-colors cursor-pointer ${
                       checked
                         ? "bg-orange-500 border-orange-500"

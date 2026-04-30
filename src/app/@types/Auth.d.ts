@@ -32,4 +32,12 @@ declare namespace IAuth {
     phone: string;
     otp: string;
   }
+
+  interface IUpdateProfile {
+    first_name?: string;
+    last_name?: string;
+    // phone?: string;
+    email?: string;
+    avatar_url?: string;
+  }
 }

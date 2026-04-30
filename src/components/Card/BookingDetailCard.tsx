@@ -1,28 +1,9 @@
-import { spec } from "node:test/reporters";
+"use client";
+import Booking_API from "@/app/api/Booking";
+import { useRequest } from "ahooks";
 import React, { useState } from "react";
-
-const TIME_SLOTS = [
-  "12:00 PM",
-  "12:30 PM",
-  "1:00 PM",
-  "1:30 PM",
-  "6:00 PM",
-  "6:30 PM",
-  "7:00 PM",
-  "7:30 PM",
-  "8:00 PM",
-];
-
-const OCCASIONS = [
-  "No Special Occasion",
-  "Birthday",
-  "Anniversary",
-  "Date Night",
-  "Business Meal",
-  "Family Gathering",
-  "Other",
-];
-
+import { useForm, Controller } from "react-hook-form";
+import { useEffect } from "react";
 const inputClass =
   "w-full bg-gray-100 rounded-xl px-4 py-3.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 border-none";
 
@@ -32,13 +13,16 @@ const selectClass =
 const labelClass =
   "block text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1.5";
 
-interface ReservationFormProps {
-  onSubmit?: (data: ReservationData) => void;
-}
+const OCCASIONS = [
+  "No special occasion",
+  "Birthday",
+  "Anniversary",
+  "Business meal",
+  "Date night",
+];
 
-interface ReservationData {
-  restaurantName: string;
-  restaurantImg?: string;
+// ── Types ──────────────────────────────────────────────
+interface FormValues {
   firstName: string;
   lastName: string;
   phone: string;
@@ -47,152 +31,210 @@ interface ReservationData {
   time: string;
   guests: number;
   occasion: string;
-  specialRequests: string;
-}
-interface BookingDetailCardProps {
+  specialRequests?: string;
   onClose: () => void;
-  onSubmit?: (data: ReservationData) => void;
+  onSuccess?: () => void;
 }
-const BookingDetailCard = ({ onClose, onSubmit }: BookingDetailCardProps) => {
-  const today = new Date().toISOString().split("T")[0];
 
-  const [form, setForm] = useState<ReservationData>({
-    restaurantName: "Mock Restaurant",
-    restaurantImg: "/image/hotels/restaurant.jpg",
-    firstName: "Test",
-    lastName: "",
-    phone: "",
-    email: "",
-    date: today,
-    time: "6:00 PM",
-    guests: 3,
-    occasion: "No Special Occasion",
-    specialRequests: "",
+interface BookingDetailCardProps {
+  restaurantId: number;
+  restaurantName: string;
+  restaurantImg?: string;
+  initialDate?: string;
+  initialTime?: string;
+  initialGuests?: number;
+  time_slot: { time: string; available: boolean }[];
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+// ── Component ──────────────────────────────────────────
+const BookingDetailCard = ({
+  restaurantId,
+  restaurantName,
+  restaurantImg,
+  time_slot,
+  initialDate,
+  initialTime = "6:00 PM",
+  initialGuests = 2,
+  onClose,
+  onSuccess,
+}: BookingDetailCardProps) => {
+  const today = new Date().toISOString().split("T")[0];
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      date: initialDate ?? today,
+      time: initialTime,
+      guests: initialGuests,
+      occasion: "No special occasion",
+      specialRequests: "",
+    },
   });
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof ReservationData, string>>
-  >({});
+  // watch header summary fields
+  const [date, time, guests] = watch(["date", "time", "guests"]);
 
-  const update = (field: keyof ReservationData, value: string | number) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const { run: createBooking, loading } = useRequest(
+    Booking_API.createBooking,
+    {
+      manual: true,
+      onSuccess: () => {
+        onSuccess?.();
+        onClose();
+      },
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.message ??
+          "Something went wrong. Please try again.";
+        setApiError(message);
+      },
+    },
+  );
 
-  const validate = () => {
-    const e: Partial<Record<keyof ReservationData, string>> = {};
-    if (!form.firstName.trim()) e.firstName = "Required";
-    if (!form.lastName.trim()) e.lastName = "Required";
-    if (form.phone.trim().length < 8) e.phone = "Invalid phone number";
-    if (!form.email.includes("@")) e.email = "Invalid email";
-    if (!form.date) e.date = "Required";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const onSubmit = (form: FormValues) => {
+    const payload = {
+      restaurant_id: Number(restaurantId),
+      first_name: form.firstName,
+      last_name: form.lastName,
+      phone: form.phone,
+      email: form.email,
+      booking_date: form.date,
+      booking_time: form.time, // must be "19:00"
+      party_size: Number(form.guests),
+      duration_minutes: 90,
+      special_requests: form.specialRequests || undefined,
+    };
+
+    console.log("✅ FINAL PAYLOAD:", payload);
+
+    createBooking(payload);
   };
+  useEffect(() => {
+    reset({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      date: initialDate ?? today,
+      time: initialTime,
+      guests: initialGuests,
+      occasion: "No special occasion",
+      specialRequests: "",
+    });
+  }, [initialDate, initialTime, initialGuests]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validate()) onSubmit?.(form);
-  };
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs "
-      onClick={onClose} // click outside to close>
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs"
+      onClick={onClose}
     >
       <div
         className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-row gap-8 items-center bg-dark p-6">
-          <img
-            src={form.restaurantImg}
-            alt={form.restaurantName}
-            className="w-30 h-30 rounded-lg object-cover"
-          />
-          <div>
-            <p className="font-bold text-xl text-white">
-              {form.restaurantName}
-            </p>
-            <div className="flex flex-row gap-4">
-              <p className="text-text-muted">{form.date} </p>
-              <p className="text-text-muted">{form.time} </p>
-              <p className="text-text-muted">{form.guests} Guests</p>
-            </div>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-8 p-6">
-          {/* ── YOUR DETAILS ── */}
+        {/* ── Header ── */}
+        {/* <div className="flex flex-row gap-8 items-center bg-dark p-6">
+          {restaurantImg && (
+            <img
+              src={restaurantImg}
+              alt={restaurantName}
+              className="w-30 h-30 rounded-lg object-cover"
+            />
+          )}
+        </div> */}
+
+        {/* ── Form ── */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 p-6">
+          {/* YOUR DETAILS */}
           <section>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xl">👤</span>
               <h2 className="text-xl font-bold text-gray-900">Your Details</h2>
             </div>
             <hr className="border-gray-200 mb-5" />
-
             <div className="grid grid-cols-2 gap-4">
-              {/* First Name */}
               <div>
                 <label className={labelClass}>First Name</label>
                 <input
-                  type="text"
-                  value={form.firstName}
-                  onChange={(e) => update("firstName", e.target.value)}
+                  {...register("firstName", { required: "Required" })}
                   placeholder="Sophea"
                   className={`${inputClass} ${errors.firstName ? "ring-2 ring-red-400" : ""}`}
                 />
                 {errors.firstName && (
                   <p className="text-xs text-red-500 mt-1">
-                    {errors.firstName}
+                    {errors.firstName.message}
                   </p>
                 )}
               </div>
 
-              {/* Last Name */}
               <div>
                 <label className={labelClass}>Last Name</label>
                 <input
-                  type="text"
-                  value={form.lastName}
-                  onChange={(e) => update("lastName", e.target.value)}
+                  {...register("lastName", { required: "Required" })}
                   placeholder="Lim"
                   className={`${inputClass} ${errors.lastName ? "ring-2 ring-red-400" : ""}`}
                 />
                 {errors.lastName && (
-                  <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.lastName.message}
+                  </p>
                 )}
               </div>
 
-              {/* Phone */}
               <div>
                 <label className={labelClass}>Phone Number</label>
                 <input
+                  {...register("phone", {
+                    required: "Required",
+                    minLength: { value: 8, message: "Invalid phone number" },
+                  })}
                   type="tel"
-                  value={form.phone}
-                  onChange={(e) => update("phone", e.target.value)}
                   placeholder="+855 12 345 678"
                   className={`${inputClass} ${errors.phone ? "ring-2 ring-red-400" : ""}`}
                 />
                 {errors.phone && (
-                  <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.phone.message}
+                  </p>
                 )}
               </div>
 
-              {/* Email */}
               <div>
                 <label className={labelClass}>Email Address</label>
                 <input
+                  {...register("email", {
+                    required: "Required",
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      message: "Invalid email",
+                    },
+                  })}
                   type="email"
-                  value={form.email}
-                  onChange={(e) => update("email", e.target.value)}
                   placeholder="sophea@email.com"
                   className={`${inputClass} ${errors.email ? "ring-2 ring-red-400" : ""}`}
                 />
                 {errors.email && (
-                  <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
             </div>
           </section>
 
-          {/* ── RESERVATION DETAILS ── */}
+          {/* RESERVATION DETAILS */}
           <section>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xl">📅</span>
@@ -201,34 +243,29 @@ const BookingDetailCard = ({ onClose, onSubmit }: BookingDetailCardProps) => {
               </h2>
             </div>
             <hr className="border-gray-200 mb-5" />
-
             <div className="grid grid-cols-2 gap-4">
-              {/* Date */}
               <div>
                 <label className={labelClass}>Date</label>
                 <input
+                  {...register("date", { required: "Required" })}
                   type="date"
-                  value={form.date}
-                  onChange={(e) => update("date", e.target.value)}
+                  min={today}
                   className={`${inputClass} ${errors.date ? "ring-2 ring-red-400" : ""}`}
                 />
                 {errors.date && (
-                  <p className="text-xs text-red-500 mt-1">{errors.date}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.date.message}
+                  </p>
                 )}
               </div>
 
-              {/* Time */}
               <div>
                 <label className={labelClass}>Time</label>
                 <div className="relative">
-                  <select
-                    value={form.time}
-                    onChange={(e) => update("time", e.target.value)}
-                    className={selectClass}
-                  >
-                    {TIME_SLOTS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
+                  <select {...register("time")} className={selectClass}>
+                    {time_slot.map((t) => (
+                      <option key={t.time} value={t.time}>
+                        {t.time}
                       </option>
                     ))}
                   </select>
@@ -238,13 +275,11 @@ const BookingDetailCard = ({ onClose, onSubmit }: BookingDetailCardProps) => {
                 </div>
               </div>
 
-              {/* Guests */}
               <div>
                 <label className={labelClass}>Number of Guests</label>
                 <div className="relative">
                   <select
-                    value={form.guests}
-                    onChange={(e) => update("guests", Number(e.target.value))}
+                    {...register("guests", { valueAsNumber: true })}
                     className={selectClass}
                   >
                     {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
@@ -259,15 +294,10 @@ const BookingDetailCard = ({ onClose, onSubmit }: BookingDetailCardProps) => {
                 </div>
               </div>
 
-              {/* Occasion */}
               <div>
                 <label className={labelClass}>Occasion (Optional)</label>
                 <div className="relative">
-                  <select
-                    value={form.occasion}
-                    onChange={(e) => update("occasion", e.target.value)}
-                    className={selectClass}
-                  >
+                  <select {...register("occasion")} className={selectClass}>
                     {OCCASIONS.map((o) => (
                       <option key={o} value={o}>
                         {o}
@@ -281,12 +311,10 @@ const BookingDetailCard = ({ onClose, onSubmit }: BookingDetailCardProps) => {
               </div>
             </div>
 
-            {/* Special Requests */}
             <div className="mt-4">
               <label className={labelClass}>Special Requests (Optional)</label>
               <textarea
-                value={form.specialRequests}
-                onChange={(e) => update("specialRequests", e.target.value)}
+                {...register("specialRequests")}
                 placeholder="Allergies, seating preferences, high chair needed, etc."
                 rows={4}
                 className={`${inputClass} resize-y`}
@@ -294,13 +322,19 @@ const BookingDetailCard = ({ onClose, onSubmit }: BookingDetailCardProps) => {
             </div>
           </section>
 
+          {/* API error */}
+          {apiError && (
+            <p className="text-sm text-red-500 text-center -mt-4">{apiError}</p>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
-            className="w-full py-4 rounded-xl text-white font-bold text-base transition-all hover:opacity-90 active:scale-[0.98]"
+            disabled={loading}
+            className="w-full py-4 rounded-xl text-white font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ background: "linear-gradient(135deg, #E8440A, #FF6B35)" }}
           >
-            Confirm Reservation →
+            {loading ? "Confirming..." : "Confirm Reservation →"}
           </button>
         </form>
       </div>
