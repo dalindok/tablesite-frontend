@@ -9,10 +9,10 @@ interface RestaurantCardProps {
   id: number;
   name: string;
   imgUrl: string;
-  rating: number;
+  rating: string;
   reviewCount: string;
   location: string;
-  priceRange: string;
+  priceRange?: string;
   type: string;
   isTopPick?: boolean;
   availableTimes?: string[];
@@ -61,7 +61,7 @@ const RestaurantCard = ({
           )}
 
           {/* Heart Button */}
-          <button
+          {/* <button
             onClick={() => setLiked(!liked)}
             className="absolute top-3 right-3 bg-white rounded-full p-2 shadow"
           >
@@ -69,7 +69,7 @@ const RestaurantCard = ({
               size={16}
               className={liked ? "text-primary" : "text-gray-300"}
             />
-          </button>
+          </button> */}
         </div>
 
         {/* Info Section */}
@@ -96,14 +96,22 @@ const RestaurantCard = ({
                   key={i}
                   size={14}
                   className={
-                    i < Math.floor(rating) ? "text-yellow-400" : "text-gray-200"
+                    i < Math.floor(parseFloat(rating))
+                      ? "text-yellow-400"
+                      : "text-gray-200"
                   }
                 />
               ))}
               <span className="text-sm font-semibold ml-1">{rating}</span>
               <span className="text-sm text-gray-400">({reviewCount})</span>
             </div>
-            <span className="font-bold text-gray-800">{priceRange}</span>
+            <span className="font-medium text-sm text-gray-800">
+              {priceRange == "LOW"
+                ? "$"
+                : priceRange === "MEDIUM"
+                  ? "$$"
+                  : "$$$"}
+            </span>
           </div>
 
           {/* Time Slots */}

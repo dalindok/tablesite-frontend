@@ -8,7 +8,9 @@ import React, {
   useState,
 } from "react";
 
-import { createSession, deleteSession, SessionPayload } from "@/action/auth";
+import type { SessionPayload } from "@/action/auth";
+
+const AUTH_STORAGE_KEY = "session";
 
 interface Session {
   userId: string;
@@ -49,27 +51,38 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({
-  children,
-  initialSession,
-}: {
-  children: ReactNode;
-  initialSession: SessionPayload | null;
-}) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading] = useState(false);
-  const [session, setSession] = useState<Session | null>(initialSession);
-  const [isLogin, setIsLogin] = useState<boolean>(!!initialSession);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLogin, setIsLogin] = useState<boolean>(false);
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const savedSession = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!savedSession) return;
+
+    try {
+      const parsed = JSON.parse(savedSession) as Session;
+      setSession(parsed);
+      setIsLogin(true);
+    } catch (error) {
+      console.error("❌ Failed to parse localStorage session:", error);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem("token");
+    }
+  }, []);
 
   const login = async (payload: LoginPayload) => {
     try {
       console.log("🔍 Login payload received:", payload);
       console.log("👤 User object:", payload.user);
-      
+
       if (!payload.user) {
         throw new Error("Missing user data in response");
       }
-      
+
       const sessionPayload: SessionPayload = {
         userId: String(payload.user.id),
         email: payload.user.email,
@@ -83,10 +96,10 @@ export const AuthProvider = ({
         accessToken: payload.token,
       };
 
-      console.log("📝 Attempting to save session to cookie...");
-      await createSession(sessionPayload); // ✅ save to httpOnly cookie
-      console.log("✅ Session saved to cookie successfully");
-      setSession(sessionPayload); // ✅ update React state
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sessionPayload));
+      localStorage.setItem("token", payload.token);
+
+      setSession(sessionPayload);
       setIsLogin(true);
     } catch (error) {
       console.error("❌ Login failed:", error);
@@ -95,7 +108,10 @@ export const AuthProvider = ({
   };
 
   const logout = async () => {
-    await deleteSession(); // ✅ clear httpOnly cookie
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem("token");
+    }
     setSession(null);
     setIsLogin(false);
   };
@@ -103,12 +119,17 @@ export const AuthProvider = ({
   // ✅ Only used for version-based cache busting now (no localStorage session)
   useEffect(() => {
     const CURRENT_VERSION = process.env.NEXT_PUBLIC_AUTH_STORAGE_VERSION;
-    const storedVersion = localStorage.getItem("AUTH_VERSION");
+    const storedVersion =
+      typeof window !== "undefined"
+        ? localStorage.getItem("AUTH_VERSION")
+        : null;
 
     if (storedVersion !== CURRENT_VERSION) {
       console.warn("Auth version changed. Clearing session...");
       logout();
-      localStorage.setItem("AUTH_VERSION", CURRENT_VERSION || "0");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("AUTH_VERSION", CURRENT_VERSION || "0");
+      }
     }
   }, []);
 

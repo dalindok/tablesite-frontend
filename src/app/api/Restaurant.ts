@@ -22,14 +22,14 @@ const Restaurant_API = {
     minPrice?: number;
     maxPrice?: number;
   }) => {
-    const res = await http.get<Restaurant.Root>(API_ROUTE.listRestaurants, {
+    const res = await http.get<IRestaurant.Root>(API_ROUTE.listRestaurants, {
       params,
     });
-    return res.data.data.data; // array of restaurants
+    return res.data.data; // return { data: [], pagination: {} }
   },
 
   getRestaurantDetails: async (id: number) => {
-    const res = await http.get<RestaurantDetail.Root>(
+    const res = await http.get<IRestaurant.Root>(
       API_ROUTE.restaurantDetails.replace(":id", id.toString()),
     );
     return res.data.data;

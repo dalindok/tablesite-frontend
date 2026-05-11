@@ -28,8 +28,9 @@ export const API_ROUTE = {
 
   // bookings
   createBooking: "bookings/create",
-  // listBookings: "bookings",
+  listBookings: "bookings/my-bookings",
   // bookingDetails: "bookings/:id",
+  cancelBooking: "bookings/:id/cancel",
 };
 export const sideBarMenu = [
   {

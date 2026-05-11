@@ -57,6 +57,9 @@ export default function SearchBar() {
               <option value="Phnom Penh">Phnom Penh</option>
               <option value="Siem Reap">Siem Reap</option>
               <option value="Battambang">Battambang</option>
+              <option value="Sihanoukville">Sihanoukville</option>
+              <option value="Kep">Kep</option>
+              <option value="Kompot">Kompot</option>
             </select>
           </div>
 

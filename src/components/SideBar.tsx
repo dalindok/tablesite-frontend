@@ -21,27 +21,39 @@ type SideBarProps = {
 };
 
 const cuisines = [
-  { label: "Italian", count: 64 },
-  { label: "Japanese", count: 48 },
-  { label: "French", count: 39 },
-  { label: "Steakhouse", count: 28 },
-  { label: "Seafood", count: 35 },
-  { label: "Healthy", count: 41 },
-  { label: "Asian Fusion", count: 52 },
+  { label: "Italian" },
+  { label: "Japanese" },
+  { label: "French" },
+  { label: "Steakhouse" },
+  { label: "Seafood" },
+  { label: "Healthy" },
+  { label: "Asian Fusion" },
 ];
 
-const neighborhoods = [
-  { label: "Daun Penh", count: 45 },
-  { label: "BKK1", count: 54 },
-  { label: "Toul Kork", count: 38 },
-  { label: "Riverside", count: 29 },
+const location = [
+  { label: "Phnom Penh" },
+  { label: "Siem Reap" },
+  { label: "Battambang" },
+  { label: "Kampot" },
+  { label: "Sihanoukville" },
+  { label: "Kep" },
+  { label: "Koh Rong" },
+  { label: "Kratie" },
+  { label: "Mondulkiri" },
+  { label: "Ratanakiri" },
+  {
+    label: "Stung Treng",
+  },
+  { label: "Pursat" },
+  { label: "Takeo" },
+  { label: "Kandal" },
 ];
 
-const priceLevels = ["$", "$$", "$$$", "$$$$"];
+const priceLevels = ["$", "$$", "$$$"];
 
 export default function SideBar({ filters, setFilters }: SideBarProps) {
   const selectedCuisines = filters.cuisines;
-  const selectedNeighborhoods = filters.neighborhoods;
+  const selectedLocation = filters.location;
   const selectedPrice = filters.priceRate;
 
   const toggleCuisine = (value: string) => {
@@ -52,27 +64,29 @@ export default function SideBar({ filters, setFilters }: SideBarProps) {
     setFilters((prev) => ({ ...prev, cuisines: updated }));
   };
 
-  const toggleNeighborhood = (value: string) => {
-    const updated = selectedNeighborhoods.includes(value)
-      ? selectedNeighborhoods.filter((v) => v !== value)
-      : [...selectedNeighborhoods, value];
-
-    setFilters((prev) => ({ ...prev, neighborhoods: updated }));
+  const toggleLocation = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      location: prev.location === value ? "" : value,
+    }));
   };
 
   const togglePrice = (value: string) => {
-    setFilters((prev) => ({ ...prev, priceRate: value }));
+    setFilters((prev) => ({
+      ...prev,
+      priceRate: prev.priceRate === value ? "" : value, // ✅ deselects if already selected
+    }));
   };
 
   return (
-    <aside className="w-64 shrink-0 bg-white border-r border-gray-100 px-5 py-6 space-y-8 font-sans">
+    <aside className="w-64 shrink-0 bg-white border-r border-gray-100 px-5 py-6  space-y-8 font-sans">
       {/* Cuisine */}
       <section>
         <h3 className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">
           Cuisine
         </h3>
         <ul className="space-y-2">
-          {cuisines.map(({ label, count }) => {
+          {cuisines.map(({ label }) => {
             const checked = selectedCuisines.includes(label);
             return (
               <li key={label} className="flex items-center justify-between">
@@ -107,9 +121,9 @@ export default function SideBar({ filters, setFilters }: SideBarProps) {
                     {label}
                   </span>
                 </label>
-                <span className="text-xs px-1 rounded-sm bg-gray-100 text-gray-400">
+                {/* <span className="text-xs px-1 rounded-sm bg-gray-100 text-gray-400">
                   {count}
-                </span>
+                </span> */}
               </li>
             );
           })}
@@ -138,19 +152,19 @@ export default function SideBar({ filters, setFilters }: SideBarProps) {
         </div>
       </section>
 
-      {/* Neighborhood */}
+      {/* City */}
       <section>
         <h3 className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">
-          Neighborhood
+          City
         </h3>
         <ul className="space-y-2">
-          {neighborhoods.map(({ label, count }) => {
-            const checked = selectedNeighborhoods.includes(label);
+          {location.map(({ label }) => {
+            const checked = selectedLocation.includes(label);
             return (
               <li key={label} className="flex items-center justify-between">
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <div
-                    onClick={() => toggleNeighborhood(label)}
+                    onClick={() => toggleLocation(label)}
                     className={`w-4 h-4 rounded flex items-center justify-center border transition-colors cursor-pointer ${
                       checked
                         ? "bg-orange-500 border-orange-500"
@@ -179,9 +193,9 @@ export default function SideBar({ filters, setFilters }: SideBarProps) {
                     {label}
                   </span>
                 </label>
-                <span className="text-xs px-1 rounded-sm bg-gray-100 text-gray-400">
-                  {count}
-                </span>
+                {/* <span className="text-xs px-1 rounded-sm bg-gray-100 text-gray-400">
+                  {/* {count} 
+                </span> */}
               </li>
             );
           })}

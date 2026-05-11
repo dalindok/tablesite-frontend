@@ -5,13 +5,14 @@ import { useRequest } from "ahooks";
 import React from "react";
 import { IoIosArrowRoundForward } from "react-icons/io";
 const TopRestaurants = () => {
-  const { run, data, loading, error, refresh } = useRequest(() =>
+  const { data, loading, error, refresh } = useRequest(() =>
     Restaurant_API.listRestaurants({
       page: 1,
       limit: 20,
       sortBy: "popular",
     }),
   );
+  console.log("data:", data);
   return (
     <div className="">
       <p className="text-md font-semibold text-primary">Featured Picks</p>
@@ -27,19 +28,19 @@ const TopRestaurants = () => {
         </div> */}
       </div>
       <div className="grid grid-cols-3 gap-6 mt-6">
-        {data?.map((item: any) => (
+        {data?.data.map((item) => (
           <RestaurantCard
             key={item.id}
             id={item.id}
             name={item.name}
-            imgUrl={item.imgUrl}
-            rating={item.rating}
-            location={item.location}
-            priceRange={item.priceRange}
-            type={item.type}
-            availableTimes={item.availableTimes}
-            isTopPick={item.isTopPick}
-            reviewCount={item.reviewCount}
+            imgUrl={item.cover_image_url}
+            rating={item.average_rating}
+            location={`${item.address}, ${item.city}, ${item.state}`}
+            priceRange="$$"
+            type={item.cuisine_type}
+            // availableTimes={item.}
+            // isTopPick={item.isTopPick}
+            reviewCount={item.total_reviews.toString()}
           />
         ))}
       </div>

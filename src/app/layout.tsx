@@ -4,9 +4,8 @@ import NavBar from "@/components/NavBar";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
-import { getSession } from "@/action/auth";
 import { AuthProvider } from "@/contexts/AuthContext";
-
+import "@/utils/http-util";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -63,21 +62,18 @@ export const metadata: Metadata = {
   },
 };
 
-// ✅ async to allow await
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialSession = await getSession(); // ✅ await + correct variable name
-
   return (
     <html lang="en">
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${inter.variable} ${libre.variable} font-sans`}
       >
-        <AuthProvider initialSession={initialSession}>
+        <AuthProvider>
           <div className="px-16 sticky top-0 z-10 bg-white">
             <NavBar />
           </div>

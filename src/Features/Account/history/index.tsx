@@ -1,48 +1,26 @@
 import ReservationCard from "@/components/Card/ReservationCard";
 import React from "react";
-
-const mockData = [
-  {
-    id: 1,
-    image: "/image/hotels/restaurant.jpg",
-    name: "Hotel California",
-    date: "2024-07-15",
-    time: "14:00",
-    guest: 2,
-    status: "Completed",
-  },
-  {
-    id: 2,
-    image: "/image/hotels/restaurant2.jpg",
-    name: "Grand Hotel",
-    date: "2024-08-20",
-    time: "16:00",
-    guest: 4,
-    status: "Canceled",
-  },
-  {
-    id: 3,
-    image: "/image/hotels/restaurant2.jpg",
-    name: "Grand Hotel",
-    date: "2024-08-20",
-    time: "16:00",
-    guest: 4,
-    status: "Completed",
-  },
-];
-const History = () => {
+// interface HistoryReservationList {
+//   historyList:IBookingList.IBookingListData[];
+// }
+const History = ({
+  historyList,
+}: {
+  historyList: IBookingList.IBookingListData[];
+}) => {
   return (
     <div>
       <p className="text-xl font-semibold mb-8">Past Reservations</p>
-      {mockData.map((reservation) => (
+      {historyList.map((reservation) => (
         <ReservationCard
           key={reservation.id}
-          image={reservation.image}
-          name={reservation.name}
-          date={reservation.date}
-          time={reservation.time}
-          guest={reservation.guest}
+          image={reservation.restaurant.cover_image_url}
+          name={reservation.restaurant.name}
+          date={reservation.booking_date}
+          time={reservation.booking_time}
+          guest={reservation.party_size}
           status={reservation.status}
+          isHistory={true}
         />
       ))}
     </div>

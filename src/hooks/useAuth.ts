@@ -21,7 +21,7 @@ export function useAuth() {
       return;
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}auth/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

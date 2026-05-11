@@ -70,7 +70,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       {/* Logout confirm dialog */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl p-6 w-[360px] shadow-xl space-y-4">
+          <div className="bg-white rounded-2xl p-6 w-90 shadow-xl space-y-4">
             <p className="text-gray-700 text-base">
               Are you sure you want to log out?
             </p>
