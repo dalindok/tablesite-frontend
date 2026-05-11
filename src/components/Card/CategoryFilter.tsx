@@ -1,11 +1,14 @@
 type Props = {
+  categories: string[];
   category: string;
   setCategory: (value: string) => void;
 };
 
-export default function CategoryFilter({ category, setCategory }: Props) {
-  const categories = ["All", "Starters", "Pasta", "Pizza", "Desserts"];
-
+export default function CategoryFilter({
+  categories,
+  category,
+  setCategory,
+}: Props) {
   return (
     <div className="flex gap-3 flex-wrap">
       {categories.map((cat) => (

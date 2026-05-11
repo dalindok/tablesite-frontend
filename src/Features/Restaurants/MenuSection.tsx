@@ -3,44 +3,36 @@
 import CategoryFilter from "@/components/Card/CategoryFilter";
 import MenuItemCard from "@/components/Card/MenuItemCard";
 import { useState } from "react";
-// import CategoryFilter from "./CategoryFilter";
-// import MenuItemCard from "./MenuItemCard";
 
-const menuItems = [
-  {
-    img: "/image/pizza.png",
-    name: "Margherita Pizza",
-    category: "Pizza",
-    description: "San Marzano tomato, buffalo mozzarella, fresh basil",
-    price: "$12",
-  },
-  {
-    img: "/image/pizza.png",
-    name: "Spaghetti Carbonara",
-    category: "Pasta",
-    description: "Guanciale, egg yolk, Pecorino Romano",
-    price: "$14",
-  },
-  {
-    img: "/image/pizza.png",
-    name: "Caprese Salad",
-    category: "Starters",
-    description: "Buffalo mozzarella, tomatoes, basil oil",
-    price: "$10",
-  },
-];
+interface MenuItem {
+  data: RestaurantDetail.RetaurantData | undefined;
+}
 
-export default function MenuSection() {
+export default function MenuSection({ data }: MenuItem) {
   const [category, setCategory] = useState("All");
 
+  // ✅ Flatten ALL items from ALL menus
+  const allMenuItems = data?.menus?.flatMap((menu) => menu.items) ?? [];
+
+  // ✅ Get unique categories from items
+  const categories = [
+    "All",
+    ...new Set(allMenuItems.map((item) => item.category)),
+  ];
+
+  // ✅ Filter by item.category, not item.name
   const filtered =
     category === "All"
-      ? menuItems
-      : menuItems.filter((item) => item.category === category);
-
+      ? allMenuItems
+      : allMenuItems.filter((item) => item.category === category);
+  console.log("categories", categories);
   return (
     <div className="mt-6">
-      <CategoryFilter category={category} setCategory={setCategory} />
+      <CategoryFilter
+        categories={categories} // pass dynamic categories
+        category={category}
+        setCategory={setCategory}
+      />
 
       <div className="grid md:grid-cols-2 gap-6 mt-6">
         {filtered.map((item, index) => (

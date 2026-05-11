@@ -1,24 +1,30 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 
-// ✅ Configure base URL from environment
 axios.defaults.baseURL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1/";
 
-// const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || 'lush_skin';
+// ✅ ADD THIS — attach token to every request
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token"); // ← match your exact key
+  console.log("🚀 INTERCEPTOR FIRED"); // ← does this appear?
+  console.log("🔑 TOKEN:", token); // ← does it show the token?
+  console.log("📋 HEADERS:", config.headers); // ← what headers exist?
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-// axios.defaults.headers.common['x-tenant-id'] = TENANT_ID;
-
-// ✅ Response interceptor
+// ✅ Response interceptor (your existing code)
 axios.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response;
 
-    // ✅ Handle "fake" errors inside a 200 response
     if (
       data &&
       (data.error === true ||
-        data.success === false || // ✅ Check for success: false
-        (data.status && data.status >= 400)) // ✅ Only reject if status is 400+
+        data.success === false ||
+        (data.status && data.status >= 400))
     ) {
       return Promise.reject({
         status: data.status || response.status,
@@ -37,11 +43,7 @@ axios.interceptors.response.use(
         (typeof data === "string" ? data : JSON.stringify(data)) ||
         "An unknown error occurred";
 
-      return Promise.reject({
-        status,
-        message,
-        data,
-      });
+      return Promise.reject({ status, message, data });
     }
 
     if (error.request) {

@@ -1,10 +1,5 @@
 type Props = {
-  item: {
-    img: string;
-    name: string;
-    description: string;
-    price: string;
-  };
+  item: RestaurantDetail.Item;
 };
 
 export default function MenuItemCard({ item }: Props) {
@@ -12,7 +7,7 @@ export default function MenuItemCard({ item }: Props) {
     <div className="bg-gray-100 rounded-xl p-4 flex gap-4">
       <div className="w-16 h-16  rounded-lg">
         <img
-          src={item.img}
+          src={item.image_url}
           alt={item.name}
           className="w-full h-full object-cover rounded-lg"
         />
@@ -21,7 +16,7 @@ export default function MenuItemCard({ item }: Props) {
       <div>
         <h3 className="font-semibold">{item.name}</h3>
         <p className="text-sm text-text-muted">{item.description}</p>
-        <p className="text-primary font-semibold mt-2">{item.price}</p>
+        <p className="text-primary font-semibold mt-2">${item.price}</p>
       </div>
     </div>
   );

@@ -1,48 +1,28 @@
 import ReservationCard from "@/components/Card/ReservationCard";
 import React from "react";
 
-const mockData = [
-  {
-    id: 1,
-    image: "/image/hotels/restaurant.jpg",
-    name: "Hotel California",
-    date: "2024-07-15",
-    time: "14:00",
-    guest: 2,
-    status: "Confirmed",
-  },
-  {
-    id: 2,
-    image: "/image/hotels/restaurant2.jpg",
-    name: "Grand Hotel",
-    date: "2024-08-20",
-    time: "16:00",
-    guest: 4,
-    status: "Pending",
-  },
-  {
-    id: 3,
-    image: "/image/hotels/restaurant2.jpg",
-    name: "Grand Hotel",
-    date: "2024-08-20",
-    time: "16:00",
-    guest: 4,
-    status: "Pending",
-  },
-];
-const Reservations = () => {
+const Reservations = ({
+  listReservation,
+  cancelBooking,
+}: {
+  listReservation: IBookingList.IBookingListData[];
+  cancelBooking: (id: string, reason: string) => void;
+}) => {
   return (
     <div>
       <p className="text-xl font-semibold mb-8">Upcoming Reservations</p>
-      {mockData.map((reservation) => (
+      {listReservation?.map((reservation) => (
         <ReservationCard
           key={reservation.id}
-          image={reservation.image}
-          name={reservation.name}
-          date={reservation.date}
-          time={reservation.time}
-          guest={reservation.guest}
+          id={reservation.id.toString()}
+          image={reservation.restaurant.cover_image_url}
+          name={reservation.restaurant.name}
+          date={reservation.booking_date}
+          time={reservation.booking_time}
+          guest={reservation.party_size}
           status={reservation.status}
+          cancelBooking={cancelBooking}
+          // onCancel={() => cancelBooking(reservation.id)}
         />
       ))}
     </div>

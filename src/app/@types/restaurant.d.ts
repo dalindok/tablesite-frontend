@@ -1,8 +1,8 @@
-declare namespace Restaurant {
+declare namespace IRestaurant {
   interface Root {
     success: boolean;
     message: string;
-    data: Data;
+    data: RestaurantDataListResponse;
   }
   interface RestaurantDataListResponse {
     data: RestaurantDataList[];
@@ -25,6 +25,9 @@ declare namespace Restaurant {
     cover_image_url: string;
     average_rating: string;
     total_reviews: number;
+    max_capacity: number;
+    min_capacity: number;
+    price_range: string;
     gallery_images: GalleryImage[];
     tags: Tag[];
     amenities: any[];

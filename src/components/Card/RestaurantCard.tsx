@@ -9,10 +9,10 @@ interface RestaurantCardProps {
   id: number;
   name: string;
   imgUrl: string;
-  rating: number;
+  rating: string;
   reviewCount: string;
   location: string;
-  priceRange: string;
+  priceRange?: string;
   type: string;
   isTopPick?: boolean;
   availableTimes?: string[];
@@ -32,13 +32,25 @@ const RestaurantCard = ({
 }: RestaurantCardProps) => {
   const [liked, setLiked] = useState(false);
   const [selectedTime, setSelectedTime] = useState(availableTimes[0]);
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg hover:shadow-light transition-transform duration-200 hover:-translate-y-1">
       <Link href={`/restaurant/${id}`}>
         {/* Image Section */}
         <div className="relative">
-          <img src={imgUrl} alt={name} className="w-full h-50 object-cover" />
+          {!imgError ? (
+            <img
+              src={imgUrl}
+              alt={name}
+              className="w-full h-50 object-cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-50 bg-gray-300 flex items-center justify-center text-gray-500">
+              No Image Available
+            </div>
+          )}
 
           {/* Top Pick Badge */}
           {isTopPick && (
@@ -49,7 +61,7 @@ const RestaurantCard = ({
           )}
 
           {/* Heart Button */}
-          <button
+          {/* <button
             onClick={() => setLiked(!liked)}
             className="absolute top-3 right-3 bg-white rounded-full p-2 shadow"
           >
@@ -57,7 +69,7 @@ const RestaurantCard = ({
               size={16}
               className={liked ? "text-primary" : "text-gray-300"}
             />
-          </button>
+          </button> */}
         </div>
 
         {/* Info Section */}
@@ -84,18 +96,26 @@ const RestaurantCard = ({
                   key={i}
                   size={14}
                   className={
-                    i < Math.floor(rating) ? "text-yellow-400" : "text-gray-200"
+                    i < Math.floor(parseFloat(rating))
+                      ? "text-yellow-400"
+                      : "text-gray-200"
                   }
                 />
               ))}
               <span className="text-sm font-semibold ml-1">{rating}</span>
               <span className="text-sm text-gray-400">({reviewCount})</span>
             </div>
-            <span className="font-bold text-gray-800">{priceRange}</span>
+            <span className="font-medium text-sm text-gray-800">
+              {priceRange == "LOW"
+                ? "$"
+                : priceRange === "MEDIUM"
+                  ? "$$"
+                  : "$$$"}
+            </span>
           </div>
 
           {/* Time Slots */}
-          <div className="flex gap-2 mt-3">
+          {/* <div className="flex gap-2 mt-3">
             {availableTimes.map((time) => (
               <button
                 key={time}
@@ -109,7 +129,7 @@ const RestaurantCard = ({
                 {time}
               </button>
             ))}
-          </div>
+          </div> */}
 
           {/* Reserve Button */}
           <button className="mt-4 w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-hover transition">
